@@ -1,0 +1,516 @@
+{
+	"info": {
+		"_postman_id": "9f94b7b3-927a-4169-a456-322368fce7c9",
+		"name": "REST Auth API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26777076"
+	},
+	"item": [
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Register user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generate random string",
+									"function generateString(length) {",
+									"    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@$!%*?&';",
+									"    let result = '';",
+									"    const charactersLength = characters.length;",
+									"    for (let i = 0; i < length; i++) {",
+									"        result += characters.charAt(Math.floor(Math.random() * charactersLength));",
+									"    }",
+									"    return result;",
+									"}",
+									"",
+									"// Check if generated string matches regex",
+									"function isValidString(str) {",
+									"    const regex = /^(?=.*[a-zA-Zа-яА-Я])(?=.*[A-ZА-Я])(?=.*[a-zа-я])(?=.*\\d)(?=.*[@$!%*?&]).{8,32}$/;",
+									"    return regex.test(str);",
+									"}",
+									"",
+									"// Generate a string until it is valid",
+									"function generateValidString() {",
+									"    let randomString = '';",
+									"    do {",
+									"        randomString = generateString(12); // String length - 12 characters",
+									"    } while (!isValidString(randomString));",
+									"    return randomString;",
+									"}",
+									"",
+									"// Generate first password",
+									"let password = generateValidString();",
+									"pm.environment.set(\"password\", password);",
+									"console.log(\"Generated Password: \" + password);",
+									"",
+									"// Generate second password",
+									"let passwordTwo = generateValidString();",
+									"pm.environment.set(\"passwordTwo\", passwordTwo);",
+									"console.log(\"Generated PasswordTwo: \" + passwordTwo);",
+									"",
+									"// Generate firstname, lastname and email",
+									"let firstName = pm.variables.replaceIn(\"{{$randomFirstName}}\");",
+									"let lastName = pm.variables.replaceIn(\"{{$randomLastName}}\");",
+									"",
+									"pm.environment.set(\"firstName\", firstName);",
+									"pm.environment.set(\"lastName\", lastName);",
+									"pm.environment.set(\"email\", `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`);",
+									"",
+									"console.log(\"First Name: \" + firstName);",
+									"console.log(\"Last Name: \" + lastName);",
+									"console.log(\"Email: \" + pm.environment.get(\"email\"));",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var response = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status is success\", function () {\r",
+									"    pm.expect(response.status).to.eql(\"success\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"User successfully created\", function () {\r",
+									"    pm.expect(response.message).to.eql(\"User successfully created\");\r",
+									"});\r",
+									"\r",
+									"if (response.status === \"success\" && response.data === null) {\r",
+									"    console.log(\"User creation confirmed. First Name: \" + pm.environment.get(\"firstName\") + \", Last Name: \" + pm.environment.get(\"lastName\") + \", Email: \" + pm.environment.get(\"email\"));\r",
+									"} else {\r",
+									"    console.log(\"Response status is not success or data is not null\");\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"{{firstName}}\",\n    \"lastName\": \"{{lastName}}\",\n    \"email\": \"{{email}}\",\n    \"password\": \"{{password}}\",\n    \"passwordConfirmation\": \"{{password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}{{apiV1}}/users/register",
+							"host": [
+								"{{host}}{{apiV1}}"
+							],
+							"path": [
+								"users",
+								"register"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"firstName\": \"{{firstName}}\",\n    \"lastName\": \"{{lastName}}\",\n    \"email\": \"{{email}}\",\n    \"password\": \"{{password}}\",\n    \"passwordConfirmation\": \"{{password}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}{{apiV1}}/users/register",
+									"host": [
+										"{{host}}{{apiV1}}"
+									],
+									"path": [
+										"users",
+										"register"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": "\"User successfully created\""
+						},
+						{
+							"name": "Passwords do not match",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"firstName\": \"{{firstName}}\",\n    \"lastName\": \"{{lastName}}\",\n    \"email\": \"{{email}}\",\n    \"password\": \"{{password}}\",\n    \"passwordConfirmation\": \"{{password}}123\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}{{apiV1}}/users/register",
+									"host": [
+										"{{host}}{{apiV1}}"
+									],
+									"path": [
+										"users",
+										"register"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": "[\n    {\n        \"code\": \"custom\",\n        \"message\": \"Passwords do not match\",\n        \"path\": [\n            \"body\",\n            \"passwordConfirmation\"\n        ]\n    }\n]"
+						},
+						{
+							"name": "Account already exists",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"firstName\": \"{{firstName}}\",\n    \"lastName\": \"{{lastName}}\",\n    \"email\": \"quincy.linda@example.com\",\n    \"password\": \"{{password}}\",\n    \"passwordConfirmation\": \"{{password}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}{{apiV1}}/users/register",
+									"host": [
+										"{{host}}{{apiV1}}"
+									],
+									"path": [
+										"users",
+										"register"
+									]
+								}
+							},
+							"status": "Conflict",
+							"code": 409,
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": "Account already exists"
+						}
+					]
+				},
+				{
+					"name": "Verify user",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{host}}{{apiV1}}/users/verify/:userID/:verificationCode",
+							"host": [
+								"{{host}}{{apiV1}}"
+							],
+							"path": [
+								"users",
+								"verify",
+								":userID",
+								":verificationCode"
+							],
+							"variable": [
+								{
+									"key": "userID",
+									"value": "668eb4d8d17026235636b8a4"
+								},
+								{
+									"key": "verificationCode",
+									"value": "adfec3f6-76f7-4f57-9e24-41a0d3e31142"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Request reset password",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{email}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}{{apiV1}}/users/forgotpassword",
+							"host": [
+								"{{host}}{{apiV1}}"
+							],
+							"path": [
+								"users",
+								"forgotpassword"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset password",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"{{passwordTwo}}\",\n    \"passwordConfirmation\": \"{{passwordTwo}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}{{apiV1}}/users/resetpassword/:userID/:passwordResetCode",
+							"host": [
+								"{{host}}{{apiV1}}"
+							],
+							"path": [
+								"users",
+								"resetpassword",
+								":userID",
+								":passwordResetCode"
+							],
+							"variable": [
+								{
+									"key": "userID",
+									"value": "668eb4d8d17026235636b8a4"
+								},
+								{
+									"key": "passwordResetCode",
+									"value": "3182f702-9f42-4848-9b23-968be6a65170"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Me",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}{{apiV1}}/users/me",
+							"host": [
+								"{{host}}{{apiV1}}"
+							],
+							"path": [
+								"users",
+								"me"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var response = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Status is success\", function () {",
+									"    pm.expect(response.status).to.eql(\"success\");",
+									"});",
+									"",
+									"if (response.status === \"success\" && response.data) {",
+									"    var accessToken = response.data.accessToken;",
+									"    var refreshToken = response.data.refreshToken;",
+									"    ",
+									"    pm.environment.set(\"accessToken\", accessToken);",
+									"    pm.environment.set(\"refreshToken\", refreshToken);",
+									"    ",
+									"    console.log(\"Access Token saved: \" + accessToken);",
+									"    console.log(\"Refresh Token saved: \" + refreshToken);",
+									"} else {",
+									"    console.log(\"Response status is not success or data is missing\");",
+									"}",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"{{passwordTwo}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}{{apiV1}}/auth/login",
+							"host": [
+								"{{host}}{{apiV1}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh access token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var response = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Status is success\", function () {",
+									"    pm.expect(response.status).to.eql(\"success\");",
+									"});",
+									"",
+									"if (response.status === \"success\" && response.data) {",
+									"    var accessToken = response.data.accessToken;",
+									"    ",
+									"    pm.environment.set(\"accessToken\", accessToken);",
+									"    ",
+									"    console.log(\"Access Token saved: \" + accessToken);",
+									"} else {",
+									"    console.log(\"Response status is not success or data is missing\");",
+									"}",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-refresh",
+								"value": "{{refreshToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{host}}{{apiV1}}/auth/refresh",
+							"host": [
+								"{{host}}{{apiV1}}"
+							],
+							"path": [
+								"auth",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{host}}{{apiV1}}/auth/logout",
+							"host": [
+								"{{host}}{{apiV1}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "host",
+			"value": "http://localhost:5000"
+		}
+	]
+}

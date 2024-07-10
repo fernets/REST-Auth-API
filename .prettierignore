@@ -1,0 +1,10 @@
+**/.git
+**/node_modules
+**/package.json
+**/package-lock.json
+**/yarn.lock
+**/dist
+**/.prettierrc
+**/REST Auth API.postman_collection.json
+**/tsconfig.json
+**/README.md
